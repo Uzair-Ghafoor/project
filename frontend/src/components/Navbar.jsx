@@ -3,7 +3,7 @@ import { IoSearchOutline } from 'react-icons/io5';
 import { Link } from 'react-router-dom';
 const Navbar = () => {
   return (
-    <header className=' bg-slate-200 shadow-md'>
+    <header className=' bg-slate-200 shadow-xl'>
       <Link
         to={'/'}
         className=' max-w-6xl mx-auto flex justify-between p-3 items-center'

@@ -34,3 +34,28 @@ export const signup = async (req, res) => {
     console.log('signup controller', error);
   }
 };
+
+export const Signin = async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(400).json({ error: 'no user found' });
+  }
+  const isPasswordCorrect = bcryptjs.compareSync(password, user.password);
+  if (!isPasswordCorrect) {
+    return res.status(400).json({ error: 'Invalid credentials' });
+  }
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: '5d',
+  });
+  const { password: pass, ...rest } = user._doc;
+
+  res
+    .cookie('token', token, {
+      sameSite: 'strict',
+      httpOnly: true,
+      maxAge: 5 * 24 * 60 * 60 * 1000,
+    })
+    .status(200)
+    .json(rest);
+};
