@@ -1,20 +1,35 @@
 import axios from 'axios';
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, redirect } from 'react-router-dom';
+import {
+  signInFailure,
+  signInStart,
+  signInSuccess,
+} from '../../features/userSlice';
 const Signin = () => {
+  const dispatch = useDispatch();
+  const { currentUser, loading, error } = useSelector((state) => state.users);
   const [form, setForm] = useState({});
   const handleChange = (e) => {
     setForm({ ...form, [e.target.id]: e.target.value });
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+    dispatch(signInStart());
     try {
       const response = await axios.post('/api/v1/user/signin', form);
-      console.log(response);
+      console.log(response.data);
+      dispatch(signInSuccess(response.data));
     } catch (error) {
-      console.log(error);
+      console.log(error.message);
+      dispatch(signInFailure(error.message));
     }
   };
+
+  if (loading) {
+    return <div>loading.....</div>;
+  }
   return (
     <div className=' bg-[#f0f4f1] h-[100vh] flex justify-center'>
       <form onSubmit={handleSubmit} className=' max-w-xl flex flex-col gap-y-6'>

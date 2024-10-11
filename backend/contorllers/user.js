@@ -4,6 +4,7 @@ import { User } from '../models/user.js';
 export const signup = async (req, res) => {
   try {
     const { username, email, password } = req.body;
+    console.log(req.body);
     if (!username || !email || !password) {
       return res.status(400).json({ error: 'All fields are required' });
     }
@@ -37,6 +38,7 @@ export const signup = async (req, res) => {
 
 export const Signin = async (req, res) => {
   const { email, password } = req.body;
+  console.log(req.body);
   const user = await User.findOne({ email });
   if (!user) {
     return res.status(400).json({ error: 'no user found' });
