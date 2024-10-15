@@ -7,6 +7,7 @@ import {
   signInStart,
   signInSuccess,
 } from '../../features/userSlice';
+import { toast } from 'react-toastify';
 const Signin = () => {
   const dispatch = useDispatch();
   const { currentUser, loading, error } = useSelector((state) => state.users);
@@ -20,9 +21,13 @@ const Signin = () => {
     try {
       const response = await axios.post('/api/v1/user/signin', form);
       console.log(response.data);
+      console.log(response);
       dispatch(signInSuccess(response.data));
+      toast.success('Logged in successfully.');
+      redirect('/');
     } catch (error) {
       console.log(error.message);
+      console.log(error);
       dispatch(signInFailure(error.message));
     }
   };

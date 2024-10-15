@@ -1,8 +1,9 @@
 import express from 'express';
-import { Signin, signup } from '../contorllers/user.js';
+import { Signin, signup, googleAuth } from '../contorllers/user.js';
 const router = express.Router();
 
 router.post('/signup', signup);
 router.post('/signin', Signin);
+router.post('/google', googleAuth);
 
 export default router;

@@ -21,6 +21,7 @@ const Profile = () => {
           <div className=' flex flex-col gap-y-4'>
             <input
               type='text'
+              disabled
               className=' w-[420px] rounded-lg p-3'
               defaultValue={currentUser.username}
             />

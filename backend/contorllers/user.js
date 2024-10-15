@@ -61,3 +61,29 @@ export const Signin = async (req, res) => {
     .status(200)
     .json(rest);
 };
+
+export const googleAuth = async (req, res) => {
+  try {
+    const { username, email, avatar } = req.body;
+    const user = await User.findOne({ email });
+    if (user) {
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+      const { password: pass, ...others } = user._doc;
+      res.cookie('token', token).status(200).json(others);
+    } else {
+      const generatedPassword = Math.random().toString(36).split('.').pop();
+      const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
+      const newUser = await User.create({
+        username,
+        email,
+        password: hashedPassword,
+        avatar,
+      });
+      const token = jwt.sign({ id: newUser.__id }, process.env.JWT_SECRET);
+      const { password: pass, ...others } = newUser._doc;
+      res.cookie('token', token).status(201).json(others);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};

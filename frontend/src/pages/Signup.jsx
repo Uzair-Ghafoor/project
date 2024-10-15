@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import OAuth from '../components/OAuth';
+import { toast } from 'react-toastify';
 const Signup = () => {
   const [form, setForm] = useState({});
   const handleChange = (e) => {
@@ -11,9 +12,12 @@ const Signup = () => {
     e.preventDefault();
     try {
       const response = await axios.post('/api/v1/user/signup', form);
+
       console.log(response);
     } catch (error) {
       console.log(error);
+      toast.error(error.response.data.error);
+      setError(error.response.data.error);
     }
   };
   return (
