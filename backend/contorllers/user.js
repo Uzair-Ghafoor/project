@@ -4,10 +4,10 @@ import { User } from '../models/user.js';
 export const signup = async (req, res) => {
   try {
     const { username, email, password } = req.body;
-    console.log(req.body);
     if (!username || !email || !password) {
       return res.status(400).json({ error: 'All fields are required' });
     }
+
     const existedUsername = await User.findOne({ username });
     if (existedUsername) {
       return res.status(400).json({ error: 'Username is already taken.' });
@@ -28,6 +28,7 @@ export const signup = async (req, res) => {
       email,
       password: hashedPassword,
     });
+
     const { password: pass, ...rest } = newUser._doc;
 
     res.status(201).json(rest);

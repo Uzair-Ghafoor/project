@@ -17,7 +17,6 @@ const Signup = () => {
     } catch (error) {
       console.log(error);
       toast.error(error.response.data.error);
-      setError(error.response.data.error);
     }
   };
   return (

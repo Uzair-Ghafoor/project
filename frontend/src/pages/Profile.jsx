@@ -1,9 +1,28 @@
-import React from 'react';
+import axios from 'axios';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 const Profile = () => {
   const { currentUser } = useSelector((state) => state.users);
+  const [form, setForm] = useState({});
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const result = await axios.post(
+        `/api/v1/verifiedUser/update/${currentUser._id}`,
+        form
+      );
+      console.log(result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.id]: e.target.value });
+  };
+  console.log(form);
   return (
     <div className=' bg-[#f0f4f1] h-[100vh]'>
       <div className=' max-w-lg mx-auto'>
@@ -18,20 +37,25 @@ const Profile = () => {
             alt=''
           />
           {/* child */}
-          <div className=' flex flex-col gap-y-4'>
+          <form onSubmit={handleSubmit} className=' flex flex-col gap-y-4'>
             <input
               type='text'
-              disabled
+              id='username'
+              onChange={handleChange}
               className=' w-[420px] rounded-lg p-3'
               defaultValue={currentUser.username}
             />
             <input
               type='text'
+              id='email'
+              onChange={handleChange}
               className=' w-[420px] rounded-lg p-3'
               defaultValue={currentUser.email}
             />
             <input
               type='text'
+              id='password'
+              onChange={handleChange}
               className=' w-[420px] rounded-lg p-3'
               placeholder='password'
             />
@@ -48,7 +72,7 @@ const Profile = () => {
             <Link to={'/listings'} className=' self-center text-green-600'>
               Show Listings
             </Link>
-          </div>
+          </form>
         </div>
       </div>
       ;

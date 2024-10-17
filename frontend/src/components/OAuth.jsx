@@ -11,13 +11,13 @@ const OAuth = () => {
       const auth = getAuth(app);
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      const name = result.user.displayName;
+      const username = result.user.displayName;
       const email = result.user.email;
       const photourl = result.user.photoURL;
       const result1 = await axios.post('/api/v1/user/google', {
-        username: name,
+        username,
         email,
-        avatar: photourl,
+        photourl,
       });
       disptach(signInSuccess(result1.data));
       console.log(result1);
