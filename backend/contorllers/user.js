@@ -88,3 +88,14 @@ export const googleAuth = async (req, res) => {
     console.log(error);
   }
 };
+
+export const logout = async (req, res) => {
+  try {
+    res
+      .cookie('token', '', { maxAge: 0 })
+      .status(200)
+      .json({ message: 'user logged out successfully.' });
+  } catch (error) {
+    console.log(error);
+  }
+};

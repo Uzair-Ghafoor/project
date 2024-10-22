@@ -12,7 +12,7 @@ const Signup = () => {
     e.preventDefault();
     try {
       const response = await axios.post('/api/v1/user/signup', form);
-
+      toast.success('Signed up successfully.');
       console.log(response);
     } catch (error) {
       console.log(error);

@@ -16,7 +16,7 @@ const App = () => {
         <Route path='/signup' element={currentUser ? <Home /> : <Signup />} />
         <Route
           path='/profile'
-          element={currentUser ? <Profile /> : <Signup />}
+          element={currentUser ? <Profile /> : <Signin />}
         />
         <Route path='/about' element={<About />} />
       </Routes>

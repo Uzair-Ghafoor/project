@@ -29,6 +29,7 @@ const Signin = () => {
     } catch (error) {
       console.log(error.message);
       console.log(error);
+      toast.error(error.response.data.error);
       dispatch(signInFailure(error.message));
     }
   };
@@ -38,13 +39,13 @@ const Signin = () => {
       <div className=' max-w-lg'>
         <form onSubmit={handleSubmit} className='  flex flex-col gap-y-6'>
           <h1 className=' mt-14 mb-9 text-center text-3xl font-medium'>
-            Sign Up
+            Sign In
           </h1>
           <input
             type='email'
             id='email'
             className=' w-[420px] rounded-lg p-3'
-            placeholder='Username'
+            placeholder='Email'
             onChange={handleChange}
           />
 
@@ -61,9 +62,9 @@ const Signin = () => {
         </form>
         <OAuth />
         <div className=' flex'>
-          <p className=' mr-2'>Already have an account?</p>
+          <p className=' mr-2'>Don't have an account?</p>
           <Link to={'/signup'} className=' text-blue-600'>
-            Signin
+            Signup
           </Link>
         </div>
       </div>
