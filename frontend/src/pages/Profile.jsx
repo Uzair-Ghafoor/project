@@ -17,6 +17,7 @@ import {
   getStorage,
 } from 'firebase/storage';
 import { toast } from 'react-toastify';
+import { app } from '../firebase';
 
 const Profile = () => {
   const fileRef = useRef(null);
@@ -24,7 +25,6 @@ const Profile = () => {
   const { currentUser } = useSelector((state) => state.users);
   const [progess, setProgress] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(null);
-  console.log(fileUploadError);
   const [file, setFile] = useState(null);
   console.log(file);
   const [form, setForm] = useState({});
@@ -49,7 +49,7 @@ const Profile = () => {
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
-          setForm({ ...formData, avatar: downloadURL })
+          setForm((prevForm) => ({ ...prevForm, avatar: downloadURL }))
         );
       }
     );
@@ -81,17 +81,8 @@ const Profile = () => {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.id]: e.target.value });
   };
+  console.log(form);
 
-  const handleSignout = async () => {
-    try {
-      const res = await axios.post('/api/v1/user/logout');
-      dispatch(signOutUserSuccess());
-      console.log(res);
-      toast.success(res.data.message);
-    } catch (error) {
-      console.log(error);
-    }
-  };
   const handleDelete = async (req, res) => {
     try {
       const res = await axios.delete(`/api/v1/user/delete/${currentUser._id}`);
@@ -103,66 +94,64 @@ const Profile = () => {
     }
   };
   return (
-    <div className=' bg-[#f0f4f1] h-[100vh]'>
-      <div className=' max-w-lg mx-auto'>
-        {/* parent */}
-        <div className=' flex flex-col gap-y-5 justify-center items-center'>
-          {/* child */}
-          <h1 className='text-3xl font-bold mt-8'>Profile</h1>
-          {/* child */}
-          <input type='file' ref={fileRef} hidden accept='image/*' />
-          <img
-            src={form.avatar || currentUser.avatar}
-            onChange={(e) => setFile(e.target.files[0])}
-            className=' w-28 h-28 rounded-full cursor-pointer'
-            onClick={() => fileRef.current.click()}
-            alt=''
-          />
-          {/* child */}
-          <form onSubmit={handleSubmit} className=' flex flex-col gap-y-4'>
-            <input
-              type='text'
-              id='username'
-              onChange={handleChange}
-              className=' w-[420px] rounded-lg p-3'
-              defaultValue={currentUser.username}
-            />
-            <input
-              type='text'
-              id='email'
-              onChange={handleChange}
-              className=' w-[420px] rounded-lg p-3'
-              defaultValue={currentUser.email}
-            />
-            <input
-              type='text'
-              id='password'
-              onChange={handleChange}
-              className=' w-[420px] rounded-lg p-3'
-              placeholder='password'
-            />
-            <button className=' w-full bg-gray-600 text-white  p-3 rounded-lg'>
-              UPDATE
-            </button>
-          </form>
-          <button className=' w-full bg-green-800 text-white  p-3 rounded-lg uppercase'>
-            create listing
-          </button>
-          <div className=' flex justify-between'>
-            <button onClick={handleDelete} className=' text-red-700'>
-              Delete Account
-            </button>
-            <button onClick={handleSignout} className=' text-red-700'>
-              Sign out
-            </button>
-            <button onClick={handleSignout}></button>
-          </div>
-          <Link to={'/listings'} className=' self-center text-green-600'>
-            Show Listings
-          </Link>
-        </div>
+    <div className=' p-3 max-w-lg mx-auto'>
+      <h1 className=' text-3xl font-semibold text-center my-7'>Profile</h1>
+      <form onSubmit={handleSubmit} className=' flex flex-col gap-y-4'>
+        <input
+          onChange={(e) => setFile(e.target.files[0])}
+          type='file'
+          ref={fileRef}
+          hidden
+          accept='images/*'
+        />
+        <img
+          className=' rounded-full object-cover h-24 w-24 self-center mt-2 cursor-pointer'
+          src={form?.avatar || currentUser?.avatar}
+          alt='profile'
+          onClick={() => fileRef.current.click()}
+        />
+
+        <input
+          type='text'
+          placeholder='username'
+          defaultValue={currentUser?.username}
+          id='username'
+          onChange={handleChange}
+          className=' border p-3 rounded-lg'
+        />
+        <input
+          type='email'
+          placeholder='email '
+          defaultValue={currentUser?.email}
+          id='email'
+          onChange={handleChange}
+          className=' border p-3 rounded-lg'
+        />
+        <input
+          type='password'
+          placeholder='password'
+          id='password'
+          onChange={handleChange}
+          className=' border p-3 rounded-lg'
+        />
+        <button className=' bg-gray-700 text-white uppercase p-3 rounded-lg hover:opacity-95'>
+          update
+        </button>
+        <Link
+          to='/create-listing'
+          className=' w-full uppercase text-center bg-green-600 text-white hover:opacity-90 p-3 rounded-lg '
+        >
+          create listing
+        </Link>
+      </form>
+      <div className=' flex justify-between mt-5'>
+        <span onClick={handleDelete} className=' text-red-700 cursor-pointer'>
+          Delete Account
+        </span>
+        <span className=' text-red-700 cursor-pointer'>Sign Out</span>
       </div>
-      ;
+      {/* <p className=' text-red-700 mt-5'>{error ? error : ''}</p> */}
+      <button className=' text-green-500 w-full'>Show Listings</button>
     </div>
   );
 };
