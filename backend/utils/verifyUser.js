@@ -20,6 +20,6 @@ export const verifyUser = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    console.log(error);
+    console.log(error, 'error in the verify user.');
   }
 };

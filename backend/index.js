@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { connectDb } from './db.js';
 import userRouter from './routes/user.js';
 import verifiedUserRouter from './routes/verifyUser.js';
+import listingRouter from './routes/listing.js';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 dotenv.config();
@@ -15,6 +16,11 @@ const port = process.env.PORT || 4000;
 
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/verifiedUser', verifiedUserRouter);
+app.use('/api/v1/listing', listingRouter);
+
+app.all('*', (err, req, res, next) => {
+  res.send(`cant find ${req.originalUrl} in the server`);
+});
 
 const Start = async () => {
   try {

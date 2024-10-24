@@ -5,6 +5,7 @@ import { Navbar } from './components';
 import { useSelector } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import CreateListing from './pages/CreateListing';
 const App = () => {
   const { currentUser } = useSelector((state) => state.users);
   return (
@@ -19,6 +20,7 @@ const App = () => {
           element={currentUser ? <Profile /> : <Signin />}
         />
         <Route path='/about' element={<About />} />
+        <Route path='/create-listing' element={<CreateListing />} />
       </Routes>
       <ToastContainer position='top-center' />
     </BrowserRouter>

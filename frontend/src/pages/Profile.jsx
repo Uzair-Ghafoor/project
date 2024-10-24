@@ -9,6 +9,8 @@ import {
   updateUserStart,
   updateUserSuccess,
   handleDeleteUser,
+  signOutFailure,
+  signOutStart,
 } from '../../features/userSlice';
 import {
   ref,
@@ -32,6 +34,12 @@ const Profile = () => {
   console.log(progess);
 
   const handleFileChange = (file) => {
+    const fileSize = 2 * 1024 * 1024;
+    console.log(file);
+    if (file.size > fileSize) {
+      setFileUploadError(true);
+      return;
+    }
     const storage = getStorage(app);
     const fileName = new Date().getTime() + file.name;
     const storageRef = ref(storage, fileName);
@@ -42,7 +50,6 @@ const Profile = () => {
         const progress =
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         setProgress(Math.round(progress));
-        console.log(progess);
       },
       (error) => {
         setFileUploadError(true);
@@ -69,7 +76,7 @@ const Profile = () => {
         `/api/v1/verifiedUser/update/${currentUser._id}`,
         form
       );
-      dispatch(updateUserSuccess(result.data));
+      dispatch(updateUserSuccess(result?.data));
       toast.success('User updates successfully.');
       console.log(result);
     } catch (error) {
@@ -83,12 +90,25 @@ const Profile = () => {
   };
   console.log(form);
 
+  const handleLogout = async () => {
+    dispatch(signOutStart());
+    try {
+      const res = await axios.post('/api/v1/user/logout');
+      console.log(res);
+      dispatch(signOutUserSuccess());
+      toast.success(res.data.message);
+    } catch (error) {
+      dispatch(signOutFailure());
+      toast(error.response.data.message);
+    }
+  };
+
   const handleDelete = async (req, res) => {
     try {
       const res = await axios.delete(`/api/v1/user/delete/${currentUser._id}`);
       console.log(res);
       dispatch(handleDeleteUser());
-      toast.success(res.data.message);
+      toast.success('User deleted successfully.');
     } catch (error) {
       console.log(error);
     }
@@ -110,7 +130,19 @@ const Profile = () => {
           alt='profile'
           onClick={() => fileRef.current.click()}
         />
-
+        <p>
+          {fileUploadError ? (
+            <span className=' text-red-700'>
+              Error Uploading image (image must be less than 2mb)
+            </span>
+          ) : progess > 0 && progess < 100 ? (
+            <span className=' text-slate-700'>{`uploading ${progess}%`}</span>
+          ) : !fileUploadError && progess === 100 ? (
+            <span className=' text-green-700'>Image uploaded successfully</span>
+          ) : (
+            ''
+          )}
+        </p>
         <input
           type='text'
           placeholder='username'
@@ -148,7 +180,9 @@ const Profile = () => {
         <span onClick={handleDelete} className=' text-red-700 cursor-pointer'>
           Delete Account
         </span>
-        <span className=' text-red-700 cursor-pointer'>Sign Out</span>
+        <span onClick={handleLogout} className=' text-red-700 cursor-pointer'>
+          Sign Out
+        </span>
       </div>
       {/* <p className=' text-red-700 mt-5'>{error ? error : ''}</p> */}
       <button className=' text-green-500 w-full'>Show Listings</button>

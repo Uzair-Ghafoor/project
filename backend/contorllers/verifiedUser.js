@@ -24,6 +24,7 @@ export const updateUser = async (req, res) => {
             username: req.body.username,
             email: req.body.email,
             password: req.body.password,
+            avatar: req.body.avatar,
           },
         },
         { new: true }
@@ -38,7 +39,7 @@ export const updateUser = async (req, res) => {
 
 export const deleteUser = async (req, res, next) => {
   const userId = req.user._id;
-  if (userId !== req.params.id) {
+  if (userId.toString().trim() !== req.params.id.trim()) {
     return res.status(404).json('You can delete only your account!');
   }
   try {

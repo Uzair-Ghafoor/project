@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate, redirect } from 'react-router-dom';
 import axios from 'axios';
 import OAuth from '../components/OAuth';
 import { toast } from 'react-toastify';
@@ -13,6 +13,7 @@ const Signup = () => {
     try {
       const response = await axios.post('/api/v1/user/signup', form);
       toast.success('Signed up successfully.');
+      redirect('/signin');
       console.log(response);
     } catch (error) {
       console.log(error);
