@@ -6,8 +6,15 @@ import {
 } from 'firebase/storage';
 import React, { useState } from 'react';
 import { app } from '../firebase';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 
 const CreateListing = () => {
+  const { currentUser } = useSelector((state) => state.users);
+  console.log(currentUser);
+  const [ImageUploadSuccess, setImageUploadSuccess] = useState('');
+  const [imageUploadError, setImageUploadError] = useState('');
   const [files, setFiles] = useState([]);
   const [formData, setFormData] = useState({
     imageUrls: [],
@@ -18,13 +25,17 @@ const CreateListing = () => {
     bedrooms: 1,
     bathrooms: 1,
     regularPrice: 50,
-    discountedPrice: '',
+    discountedPrice: 0,
     furnished: false,
     offer: false,
     parking: false,
   });
   console.log(formData);
   const uploadImages = () => {
+    const fileSize = 2 * 1024 * 1024;
+    if (files.size < fileSize) {
+      return setImageUploadError('image upload failed (2mb max)');
+    }
     if (files.length > 0 && files.length < 7) {
       const promises = [];
 
@@ -36,9 +47,14 @@ const CreateListing = () => {
               ...formData,
               imageUrls: formData.imageUrls.concat(urls),
             });
+            setImageUploadSuccess('images uploaded successfully.');
           })
-          .catch((error) => {});
+          .catch((error) => {
+            setImageUploadError('image upload failed (2mb max)');
+          });
       }
+    } else {
+      setImageUploadError('You can only upload a max of 6 images');
     }
   };
 
@@ -67,13 +83,61 @@ const CreateListing = () => {
     });
   };
 
+  const handleChange = (e) => {
+    if (e.target.id === 'sale' || e.target.id === 'rent') {
+      setFormData({ ...formData, type: e.target.id });
+    }
+    if (
+      e.target.id === 'furnished' ||
+      e.target.id === 'parking' ||
+      e.target.id === 'offer'
+    ) {
+      setFormData({
+        ...formData,
+        [e.target.id]: e.target.checked,
+      });
+    }
+    if (
+      e.target.type === 'number' ||
+      e.target.type === 'text' ||
+      e.target.type === 'textarea'
+    ) {
+      setFormData({ ...formData, [e.target.id]: e.target.value });
+    }
+    if (e.target.id === 'discountedPrice') {
+      setFormData({ ...formData, [e.target.id]: e.target.value });
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // /api/v1/listing/create
+    try {
+      if (formData.imageUrls.length < 1) {
+        return setImageUploadError('Please upload atleast 1 image.');
+      }
+      if (Number(formData.regularPrice) < Number(formData.discountedPrice)) {
+        return setImageUploadError(
+          'discounted Price must be less than regular price'
+        );
+      }
+      const res = await axios.post('/api/v1/listing/create', {
+        ...formData,
+        userRef: currentUser._id,
+      });
+      toast.success('listing created.');
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className=' p-4'>
       <h1 className=' text-3xl font-semibold text-center my-3'>
         Create a listing
       </h1>
       {/* parent */}
-      <form className=' max-w-3xl mx-auto'>
+      <form onSubmit={handleSubmit} className=' max-w-3xl mx-auto'>
         <div className=' flex flex-col sm:flex-row gap-4'>
           {/* child */}
           <div className=' flex flex-col flex-1 gap-y-4'>
@@ -81,18 +145,24 @@ const CreateListing = () => {
               type='text'
               id='name'
               placeholder='Name'
+              onChange={handleChange}
+              value={formData.name}
               className=' input input-bordered input-md w-96'
             />
             <textarea
-              type='text'
+              type='textarea'
               placeholder='Description'
               id='description'
+              onChange={handleChange}
+              value={formData.description}
               className=' textarea textarea-bordered textarea-md w-96'
             />
             <input
               type='text'
               id='address'
               placeholder='Address'
+              onChange={handleChange}
+              value={formData.address}
               className=' input input-bordered input-md w-96'
             />
             <div className=' flex gap-4 flex-wrap'>
@@ -100,6 +170,8 @@ const CreateListing = () => {
                 <input
                   type='checkbox'
                   id='sale'
+                  onChange={handleChange}
+                  checked={formData.type === 'sale'}
                   className='checkbox checkbox-primary'
                 />
                 <p>Sell</p>
@@ -107,7 +179,9 @@ const CreateListing = () => {
               <div className=' flex items-center gap-2'>
                 <input
                   type='checkbox'
-                  id='sale'
+                  id='rent'
+                  onChange={handleChange}
+                  checked={formData.type === 'rent'}
                   className='checkbox checkbox-primary'
                 />
                 <p>Rent</p>
@@ -115,7 +189,9 @@ const CreateListing = () => {
               <div className=' flex items-center gap-2'>
                 <input
                   type='checkbox'
-                  id='sale'
+                  id='parking'
+                  checked={formData.parking}
+                  onChange={handleChange}
                   className='checkbox checkbox-primary'
                 />
                 <p>Parking Spot</p>
@@ -123,7 +199,9 @@ const CreateListing = () => {
               <div className=' flex items-center gap-2'>
                 <input
                   type='checkbox'
-                  id='sale'
+                  id='furnished'
+                  checked={formData.furnished}
+                  onChange={handleChange}
                   className='checkbox checkbox-primary'
                 />
                 <p>Furnished</p>
@@ -131,7 +209,9 @@ const CreateListing = () => {
               <div className=' flex items-center gap-2'>
                 <input
                   type='checkbox'
-                  id='sale'
+                  id='offer'
+                  onChange={handleChange}
+                  checked={formData.offer}
                   className='checkbox checkbox-primary'
                 />
                 <p>Offer</p>
@@ -146,6 +226,8 @@ const CreateListing = () => {
                   min={1}
                   max={10}
                   defaultValue={1}
+                  onChange={handleChange}
+                  value={formData.bedrooms}
                   className=' p-3 w-20 rounded-lg border-gray-400'
                 />
                 <p>Beds</p>
@@ -153,10 +235,12 @@ const CreateListing = () => {
               <div className='flex items-center gap-2'>
                 <input
                   type='number'
-                  id='bedrooms'
-                  placeholder='Beds'
+                  id='bathrooms'
+                  placeholder='Baths'
                   min={1}
                   max={5}
+                  onChange={handleChange}
+                  value={formData.bathrooms}
                   className=' p-3 w-20 rounded-lg border-gray-400'
                 />
                 <p>Baths</p>
@@ -164,10 +248,12 @@ const CreateListing = () => {
               <div className='flex items-center gap-2'>
                 <input
                   type='number'
-                  id='bedrooms'
-                  placeholder='Beds'
+                  id='regularPrice'
+                  placeholder='Regular Price'
                   min={50}
                   max={10000000}
+                  onChange={handleChange}
+                  value={formData.regularPrice}
                   className=' p-3 w-40 rounded-lg border-gray-400'
                 />
                 <p>Regular Price</p>
@@ -175,8 +261,10 @@ const CreateListing = () => {
               <div className='flex items-center gap-2'>
                 <input
                   type='number'
-                  id='bedrooms'
-                  placeholder='Beds'
+                  id='discountedPrice'
+                  placeholder='Discounted Price'
+                  onChange={handleChange}
+                  value={formData.discountedPrice}
                   className=' p-3 w-40 rounded-lg border-gray-400'
                 />
                 <p>Discounted Price</p>
@@ -197,6 +285,7 @@ const CreateListing = () => {
                 multiple
                 className=' border p-3 border-gray-600'
               />
+
               <button
                 type='button'
                 onClick={uploadImages}
@@ -205,6 +294,13 @@ const CreateListing = () => {
                 Upload
               </button>
             </div>
+            {imageUploadError && (
+              <p className=' text-red-500'>{imageUploadError}</p>
+            )}
+            {ImageUploadSuccess && (
+              <p className=' text-green-500'>{ImageUploadSuccess}</p>
+            )}
+
             <button className=' bg-slate-700 p-3 rounded-lg  text-white mt-7'>
               Create Listing
             </button>
